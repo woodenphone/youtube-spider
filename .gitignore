@@ -1,0 +1,5 @@
+*.pyc
+*.exe
+config.py
+debug/
+download/
