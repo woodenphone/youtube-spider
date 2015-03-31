@@ -54,8 +54,8 @@ def crop_youtube_id(url):
         #logging.debug("Extracted id: "+repr(video_id)+" from url: "+repr(url))
         return video_id
     else:
-        logging.error("Could not extract video ID!")
-        logging.debug("locals(): "+repr(locals()))
+        #logging.error("Could not extract video ID!")
+        #logging.debug("locals(): "+repr(locals()))
         return
 
 
@@ -101,10 +101,11 @@ def scan_video(video_url,output_dir,save_video=False):
 
 
 def spider(start_video_id,output_dir="download",save_videos=False):
-    new_video_ids = [start_video_id]
-    processed_video_ids = []
-    processed_videos = []
-    all_seen_links = []
+    new_video_ids = [start_video_id]# strings of ids to be done
+    processed_video_ids = []# Strings of successful yt-dl ids
+    failed_video_ids = []# Strings of video ids that did not return success code on yt-dl
+    processed_videos = []# Video objects
+    all_seen_links = []# Strings of all seen links
     counter = 0
     while (len(new_video_ids) > 0):
         counter += 1
@@ -116,7 +117,11 @@ def spider(start_video_id,output_dir="download",save_videos=False):
         delay(2)
         done_video = scan_video(video_url,output_dir,save_video=False)
         if done_video is None:# Handle failed YT-DL commands
+            failed_video_ids.append(current_video_id)
             continue
+        else:
+            processed_videos.append(done_video)
+        processed_video_ids.append(current_video_id)
         # Grab links from metadata
         links = []
         links += find_url_links(done_video.annotations_xml)
@@ -131,11 +136,15 @@ def spider(start_video_id,output_dir="download",save_videos=False):
                     logging.debug("Adding new ID: "+repr(link_yt_id))
                     new_video_ids.append(link_yt_id)
             continue
-        logging.debug("all_seen_links: "+repr(all_seen_links))
+        #logging.debug("all_seen_links: "+repr(all_seen_links))
+        logging.debug("new_video_ids: "+repr(new_video_ids))
         logging.debug("processed_video_ids: "+repr(processed_video_ids))
-        logging.debug("processed_videos: "+repr(processed_videos))
+        #logging.debug("processed_videos: "+repr(processed_videos))
         continue
+    logging.info("Finished spidering")
     logging.debug("all_seen_links: "+repr(all_seen_links))
+    logging.debug("new_video_ids: "+repr(new_video_ids))
+    logging.debug("failed_video_ids: "+repr(failed_video_ids))
     logging.debug("processed_video_ids: "+repr(processed_video_ids))
     logging.debug("processed_videos: "+repr(processed_videos))
     return
