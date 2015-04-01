@@ -133,7 +133,7 @@ def spider(start_video_id,output_dir="download",save_videos=False):
             link_yt_id = crop_youtube_id(link)
             if link_yt_id:
                 if (link_yt_id not in processed_video_ids) and (link_yt_id not in new_video_ids):
-                    logging.debug("Adding new ID: "+repr(link_yt_id))
+                    logging.debug("Adding new ID: "+repr(link_yt_id)+" from link: "+repr(link))
                     new_video_ids.append(link_yt_id)
             continue
         #logging.debug("all_seen_links: "+repr(all_seen_links))
@@ -151,12 +151,61 @@ def spider(start_video_id,output_dir="download",save_videos=False):
 
 
 
+
+
+
+def newspider(base_path="",max_loops=100):
+    # Run yt-dl normally
+    videos_to_save = []
+    video_ids_saved = []
+    scanned_files = []
+    loop_counter = 0
+    while ( (len(videos_to_save) > 0)
+    and (loop_counter <= max_loops) ):
+        # Scan for metadata files
+        # .info.json
+        # Find files
+        json_glob_string = os.path.join(base_path,"*.info.json")
+        info_paths = glob.glob(json_glob_string)
+        logging.debug("info_paths: "+repr(info_paths))
+
+        # Process found files
+        for info_path in info_paths:
+            if info_path not in scanned_files:
+                # Read data from file
+                info_json = read_file(info_path)
+                info_dict = json.loads(info_json)
+                # Parse file data
+                # Get video ID
+                video_id = info_dict
+                # Find URLS
+                # Collect YT URLS
+                # Keep YT URLS with new IDs
+
+                # Add processed filepath to done list
+                scanned_files.append(info_path)
+
+
+
+        # .annotations.xml
+        annotations_glob_string = os.path.join(base_path,"*.annotations.xml")
+        annotation_paths = glob.glob(annotations_glob_string)
+        logging.debug("annotation_paths: "+repr(annotation_paths))
+        # Read and parse new metadata files for video links
+        # Run ty-dl for new videos
+
+
+
+
+
+
+
 def main():
     try:
         setup_logging(log_file_path=os.path.join("debug","youtube-spider-log.txt"))
         # Program
-        start_video_id = crop_youtube_id("https://www.youtube.com/watch?v=lBOaBhVduu0")
-        spider(start_video_id=start_video_id,output_dir="download",save_videos=False)
+        start_video_id = crop_youtube_id(config.video_url)
+        spider(start_video_id=start_video_id,output_dir="download",save_videos=config.save_videos)
         # /Program
         logging.info("Finished, exiting.")
         return
